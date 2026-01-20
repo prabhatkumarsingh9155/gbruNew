@@ -17,6 +17,8 @@ import Account from './components/Account/Account';
 import SignIn from './components/SignIn/SignIn';
 import AddNewAddress from './components/AddNewAddress/AddNewAddress';
 import Orders from './components/Orders/Orders';
+import ViewCartButton from './components/ViewCartButton/ViewCartButton';
+import WhatsAppFloat from './components/WhatsAppFloat/WhatsAppFloat';
 
 import ViewDetails from './components/ViewDetails/ViewDetails';
 import Footer from './components/Footer/Footer';
@@ -137,6 +139,7 @@ function App() {
       <Header 
         cartItemsCount={getCartItemsCount()} 
         user={user}
+        userDetails={userDetails}
         navigateTo={navigateTo}
       />
       
@@ -147,6 +150,13 @@ function App() {
       {currentPage !== 'cart' && currentPage !== 'checkout' && currentPage !== 'account' && currentPage !== 'products' && currentPage !== 'productDetails' && currentPage !== 'product-details' && currentPage !== 'addNewAddress' && currentPage !== 'orders' && currentPage !== 'viewDetails' && currentPage !== 'payment' && currentPage !== 'order-success' && <Footer navigateTo={navigateTo} />}
       
       {currentPage === 'auth' && <SignIn setUser={setUser} navigateTo={navigateTo} />}
+      
+      {currentPage !== 'cart' && currentPage !== 'checkout' && currentPage !== 'payment' && currentPage !== 'order-success' && (currentPage === 'home' || currentPage === 'productDetails' || currentPage === 'products') && (
+        <>
+          <ViewCartButton userDetails={userDetails} currentPage={currentPage} onViewCart={() => navigateTo('cart')} />
+          <WhatsAppFloat />
+        </>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUserAuthentication } from './useUserAuthentication';
 import { useShoppingCart } from './useShoppingCart';
 import { useProductsCatalog } from './useProductsCatalog';
@@ -6,7 +6,7 @@ import { useProductCategories } from './useProductCategories';
 
 export const useAppState = () => {
   const { user, setUser, userDetails, logout } = useUserAuthentication();
-  const { cart, cartCount, fetchCartCount, addToCart, updateCartQuantity, removeFromCart, clearCart, getCartTotal, getCartItemsCount } = useShoppingCart(userDetails);
+  const { cart, cartCount, fetchCart, fetchCartCount, addToCart, updateCartQuantity, removeFromCart, clearCart, getCartTotal, getCartItemsCount } = useShoppingCart(userDetails);
   const { products, setProducts, heroSlides, fetchProductsByCategory } = useProductsCatalog(user);
   const { categories, selectedCategory, setSelectedCategory } = useProductCategories(user);
   
@@ -18,6 +18,27 @@ export const useAppState = () => {
   const [checkoutData, setCheckoutData] = useState(null);
   const [editingAddress, setEditingAddress] = useState(null);
 
+  // Handle browser back button
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (currentPage !== 'home') {
+        event.preventDefault();
+        navigateTo(previousPage || 'home');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Push initial state
+    if (window.history.state === null) {
+      window.history.pushState({ page: 'home' }, '', window.location.href);
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [currentPage, previousPage]);
+
   const navigateTo = (page, data = null, categoryName = null, source = null) => {
     // Clear URL parameters when navigating away from order-success
     if (currentPage === 'order-success' && page !== 'order-success') {
@@ -27,6 +48,11 @@ export const useAppState = () => {
     // Store previous page when navigating to productDetails, auth, or addNewAddress
     if (page === 'productDetails' || page === 'auth' || page === 'addNewAddress') {
       setPreviousPage(currentPage);
+    }
+    
+    // Push state to browser history (except when going back)
+    if (page !== previousPage) {
+      window.history.pushState({ page }, '', window.location.href);
     }
     
     setCurrentPage(page);

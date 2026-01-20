@@ -23,6 +23,16 @@
   transition: opacity 0.8s ease-in-out;
 }
 
+@media (min-width: 769px) {
+  .hero {
+    height: 500px;
+  }
+  
+  .hero-slide {
+    background-size: 100% 100%;
+  }
+}
+
 .hero-slide.active {
   opacity: 1;
 }
@@ -338,7 +348,9 @@
 
 @media (max-width: 768px) {
   .hero {
-    padding: 2rem 0;
+    padding: 0 !important;
+    margin-top: 0 !important;
+    height: 250px;
   }
   
   .hero-content {

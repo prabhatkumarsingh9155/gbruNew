@@ -36,20 +36,30 @@ const SignIn = ({ setUser, navigateTo }) => {
 
   // Fetch countries from API
   const fetchCountries = async () => {
+    console.log('Fetching countries...');
     try {
       const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.area.api.get_countries`, {
         method: 'GET',
-        headers: {'Content-Type': 'application/json'}
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': 'SHOPTION_XYZ_9834SDJKS',
+          'X-API-SECRET': 'SHOPTION_SECRET_99ASD9A8S9D'
+        }
       });
       const data = await response.json();
+      console.log('Countries API response:', data);
       if (response.ok && data.message && data.message.data && Array.isArray(data.message.data)) {
+        console.log('Countries data:', data.message.data);
         // Sort countries to put India at the top
         const sortedCountries = data.message.data.sort((a, b) => {
           if (a.name === 'India') return -1;
           if (b.name === 'India') return 1;
           return a.name.localeCompare(b.name);
         });
+        console.log('Setting countries:', sortedCountries);
         setCountries(sortedCountries);
+      } else {
+        console.log('Countries API failed or no data');
       }
     } catch (error) {
       console.error('Error fetching countries:', error);
@@ -62,7 +72,11 @@ const SignIn = ({ setUser, navigateTo }) => {
     try {
       const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.area.api.get_states`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': 'SHOPTION_XYZ_9834SDJKS',
+          'X-API-SECRET': 'SHOPTION_SECRET_99ASD9A8S9D'
+        },
         body: JSON.stringify({ name: country })
       });
       const data = await response.json();
@@ -83,7 +97,11 @@ const SignIn = ({ setUser, navigateTo }) => {
     try {
       const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.area.api.get_districts`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': 'SHOPTION_XYZ_9834SDJKS',
+          'X-API-SECRET': 'SHOPTION_SECRET_99ASD9A8S9D'
+        },
         body: JSON.stringify({ state_id: state })
       });
       const data = await response.json();
@@ -100,7 +118,11 @@ const SignIn = ({ setUser, navigateTo }) => {
     try {
       const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.area.api.get_tahsils`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': 'SHOPTION_XYZ_9834SDJKS',
+          'X-API-SECRET': 'SHOPTION_SECRET_99ASD9A8S9D'
+        },
         body: JSON.stringify({ district_id: district })
       });
       const data = await response.json();
@@ -116,9 +138,13 @@ const SignIn = ({ setUser, navigateTo }) => {
   const fetchMarketplaces = async (tahsil) => {
     console.log('Fetching marketplaces for tahsil:', tahsil);
     try {
-      const response = await fetch('${API_CONFIG.Prabhat_URL}/api/method/shoption_api.area.api.get_marketplaces', {
+      const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.area.api.get_marketplaces`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-KEY': 'SHOPTION_XYZ_9834SDJKS',
+          'X-API-SECRET': 'SHOPTION_SECRET_99ASD9A8S9D'
+        },
         body: JSON.stringify({ tehsil_id: tahsil })
       });
       const data = await response.json();
@@ -308,7 +334,7 @@ const SignIn = ({ setUser, navigateTo }) => {
   // Create lead after successful authentication
   const createLead = async (name = 'User') => {
     try {
-      const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.otp.api.lead_create`, {
+      const response = await fetch(`https://uaterp.gbru.in/api/method/shoption_api.otp.api.lead_create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

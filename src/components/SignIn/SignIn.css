@@ -53,17 +53,14 @@
 .brand-name {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #204123;
 }
 
 /* Header Styles */
 .auth-header {
   padding: 2rem 2rem 1rem;
   text-align: center;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  background: #f8f9fa;
   position: relative;
 }
 
@@ -93,7 +90,7 @@
 .auth-header h1 {
   font-size: 1.875rem;
   font-weight: 700;
-  color: #1a202c;
+  color: #204123;
   margin-bottom: 0.5rem;
 }
 
@@ -135,9 +132,9 @@
 .input-group input:focus,
 .input-group select:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #204123;
   background: white;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 3px rgba(32, 65, 35, 0.1);
 }
 
 .input-group select {
@@ -153,7 +150,7 @@
 .primary-btn {
   width: 100%;
   padding: 0.875rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #204123;
   color: white;
   border: none;
   border-radius: 8px;
@@ -169,8 +166,9 @@
 }
 
 .primary-btn:hover:not(:disabled) {
+  background: #0A8B1E;
   transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(10, 139, 30, 0.2);
 }
 
 .primary-btn:disabled {
@@ -183,8 +181,8 @@
   width: 100%;
   padding: 0.875rem;
   background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
+  color: #204123;
+  border: 2px solid #204123;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
@@ -194,7 +192,7 @@
 }
 
 .back-btn:hover:not(:disabled) {
-  background: #667eea;
+  background: #204123;
   color: white;
 }
 
@@ -257,7 +255,7 @@
 .resend-btn {
   background: none;
   border: none;
-  color: #667eea;
+  color: #204123;
   font-weight: 600;
   cursor: pointer;
   font-size: 0.875rem;
@@ -265,7 +263,7 @@
 }
 
 .resend-btn:hover {
-  color: #5a67d8;
+  color: #0A8B1E;
 }
 
 /* Error Message */
@@ -372,13 +370,13 @@
 }
 
 .step.active .step-number {
-  background: #667eea;
+  background: #204123;
   color: white;
 }
 
 .step.completed .step-number {
-  background: #10b981;
-  color: white;
+  background: #EDDA00;
+  color: #000000;
 }
 
 .step-label {
@@ -388,12 +386,12 @@
 }
 
 .step.active .step-label {
-  color: #667eea;
+  color: #204123;
   font-weight: 600;
 }
 
 .step.completed .step-label {
-  color: #10b981;
+  color: #EDDA00;
   font-weight: 600;
 }
 
@@ -407,7 +405,7 @@
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
   .auth-page {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #f8f9fa;
     justify-content: center;
     pointer-events: all;
   }

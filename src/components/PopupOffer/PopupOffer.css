@@ -1,0 +1,175 @@
+.popup-overlay-po {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.popup-content-po {
+  background: white;
+  border-radius: 16px;
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+  animation: slideUp 0.3s ease;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.popup-close-po {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #333;
+  line-height: 1;
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.popup-close-po:hover {
+  background: white;
+  color: #000;
+  transform: rotate(90deg);
+}
+
+.popup-offer-banner-po {
+  background: linear-gradient(135deg, #204123 0%, #0A8B1E 100%);
+  color: white;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.offer-badge-po {
+  display: inline-block;
+  background: #EDDA00;
+  color: #000;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+.popup-offer-banner-po h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.offer-discount-po {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.discount-percent-po {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.discount-text-po {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.popup-body-po {
+  padding: 2rem;
+  text-align: center;
+}
+
+.offer-description-po {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.offer-code-po {
+  background: #f8f9fa;
+  border: 2px dashed #204123;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.offer-code-po span {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.offer-code-po strong {
+  color: #204123;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.popup-shop-btn-po {
+  width: 100%;
+  padding: 1rem;
+  background: #204123;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 1rem;
+}
+
+.popup-shop-btn-po:hover {
+  background: #0A8B1E;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(10, 139, 30, 0.4);
+}
+
+.offer-validity-po {
+  color: #999;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .popup-offer-banner-po {
+    padding: 2rem 1.5rem;
+  }
+
+  .popup-offer-banner-po h2 {
+    font-size: 1.5rem;
+  }
+
+  .discount-percent-po {
+    font-size: 3rem;
+  }
+
+  .popup-body-po {
+    padding: 1.5rem;
+  }
+}

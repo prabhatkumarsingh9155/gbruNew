@@ -1,0 +1,519 @@
+/* Overlay */
+.coupon-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(25, 35, 75, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+  animation: overlayFadeIn 0.3s ease-out;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Card */
+.coupon-popup-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 380px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: cardSlideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes cardSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Confetti Decorations */
+.confetti-decorations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.confetti-item {
+  position: absolute;
+  animation: floatConfetti 3s ease-in-out infinite;
+}
+
+.confetti-item.circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.confetti-item.curve {
+  width: 30px;
+  height: 30px;
+  border: 3px solid;
+  border-radius: 50%;
+  border-color: transparent;
+  border-top-color: currentColor;
+  border-right-color: currentColor;
+  transform: rotate(45deg);
+}
+
+.confetti-item.orange {
+  color: #FF6B35;
+  background-color: #FF6B35;
+}
+
+.confetti-item.yellow {
+  color: #FFC107;
+  background-color: #FFC107;
+}
+
+.confetti-item.white {
+  color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+@keyframes floatConfetti {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateY(-15px) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+/* Gift Icon */
+.gift-icon-wrapper {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: 140px;
+}
+
+.gift-icon-container {
+  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+  animation: giftJump 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) 2;
+  transform-origin: center bottom;
+  position: relative;
+}
+
+.gift-icon-container.blasting {
+  animation: giftBlast 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.gift-icon-container.removed {
+  background: linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%);
+  animation: sadDroop 2s ease-in-out infinite;
+}
+
+.sad-icon {
+  animation: iconShake 2s ease-in-out infinite;
+}
+
+.gift-icon {
+  color: #ffffff;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+/* Gift jumping animation with squash and stretch */
+@keyframes giftJump {
+  0% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+  10% {
+    transform: translateY(-8px) scaleY(1.15) scaleX(0.9);
+  }
+  20% {
+    transform: translateY(-45px) scaleY(1.2) scaleX(0.85);
+  }
+  30% {
+    transform: translateY(-55px) scaleY(1.15) scaleX(0.9);
+  }
+  40% {
+    transform: translateY(-45px) scaleY(1.2) scaleX(0.85);
+  }
+  50% {
+    transform: translateY(-8px) scaleY(1.15) scaleX(0.9);
+  }
+  55% {
+    transform: translateY(0) scaleY(0.85) scaleX(1.15);
+  }
+  65% {
+    transform: translateY(-20px) scaleY(1.1) scaleX(0.95);
+  }
+  75% {
+    transform: translateY(-25px) scaleY(1.12) scaleX(0.93);
+  }
+  85% {
+    transform: translateY(-10px) scaleY(1.05) scaleX(0.98);
+  }
+  95% {
+    transform: translateY(0) scaleY(0.9) scaleX(1.1);
+  }
+  100% {
+    transform: translateY(0) scaleY(1) scaleX(1);
+  }
+}
+
+/* Gift blast animation */
+@keyframes giftBlast {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3) rotate(15deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* Blast particles container */
+.blast-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.blast-particle {
+  position: absolute;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  animation: blastParticle 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes blastParticle {
+  0% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+      calc(cos(var(--angle)) * 150px),
+      calc(sin(var(--angle)) * 150px)
+    ) scale(0.3) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Logo reveal */
+.logo-container {
+  animation: logoReveal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.brand-logo-reveal {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.2));
+  animation: logoFloat 2s ease-in-out infinite;
+}
+
+@keyframes logoReveal {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.05);
+  }
+}
+
+/* Sad animations for removed state */
+@keyframes sadDroop {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  25% {
+    transform: translateY(10px) rotate(-5deg) scale(0.98);
+  }
+  50% {
+    transform: translateY(15px) rotate(0deg) scale(0.95);
+  }
+  75% {
+    transform: translateY(10px) rotate(5deg) scale(0.98);
+  }
+}
+
+@keyframes iconShake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-3deg);
+  }
+  40% {
+    transform: rotate(3deg);
+  }
+  60% {
+    transform: rotate(-3deg);
+  }
+  80% {
+    transform: rotate(3deg);
+  }
+}
+
+/* Tear drops */
+.tear-drop {
+  position: absolute;
+  width: 8px;
+  height: 12px;
+  background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  opacity: 0;
+  animation: tearFall 3s ease-in infinite;
+}
+
+.tear-left {
+  top: 30%;
+  left: 20%;
+  animation-delay: 0.5s;
+}
+
+.tear-right {
+  top: 30%;
+  right: 20%;
+  animation-delay: 1.5s;
+}
+
+@keyframes tearFall {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(80px) scale(0.8);
+  }
+}
+
+/* Text Content */
+.popup-text-content {
+  margin-bottom: 2rem;
+}
+
+.popup-subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4B5563;
+  margin: 0 0 0.5rem 0;
+  animation: textFadeIn 0.5s ease-out 0.2s backwards;
+}
+
+.popup-discount {
+  font-size: 4rem;
+  font-weight: 900;
+  color: #EF4444;
+  line-height: 1;
+  margin: 0.5rem 0;
+  animation: discountPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s backwards;
+}
+
+.popup-discount.removed-text {
+  font-size: 1.5rem;
+  color: #6B7280;
+  font-weight: 600;
+  animation: sadTextFade 0.5s ease-out 0.3s backwards;
+}
+
+@keyframes sadTextFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popup-description {
+  font-size: 0.95rem;
+  color: #6B7280;
+  margin: 0.5rem 0 0 0;
+  animation: textFadeIn 0.5s ease-out 0.4s backwards;
+}
+
+@keyframes textFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes discountPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Action Button */
+.popup-action-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  margin-bottom: 1rem;
+  animation: buttonSlideIn 0.5s ease-out 0.5s backwards;
+}
+
+.popup-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.popup-action-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes buttonSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skip Button */
+.popup-skip-btn {
+  background: none;
+  border: none;
+  color: #1F2937;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  animation: buttonSlideIn 0.5s ease-out 0.6s backwards;
+}
+
+.popup-skip-btn:hover {
+  color: #6B7280;
+}
+
+/* Responsive Styles */
+@media (max-width: 480px) {
+  .coupon-popup-card {
+    padding: 2rem 1.5rem;
+    max-width: 340px;
+  }
+
+  .gift-icon-container {
+    padding: 1.25rem;
+  }
+
+  .gift-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .popup-discount {
+    font-size: 3rem;
+  }
+
+  .confetti-item.circle {
+    width: 10px;
+    height: 10px;
+  }
+
+  .confetti-item.curve {
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+  }
+}
+
+@media (max-width: 360px) {
+  .popup-discount {
+    font-size: 2.5rem;
+  }
+
+  .popup-action-btn {
+    font-size: 0.9rem;
+    padding: 0.875rem;
+  }
+}

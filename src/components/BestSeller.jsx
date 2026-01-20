@@ -55,6 +55,9 @@ const BestSeller = ({ addToCart, navigateTo, user, products = [], userDetails, f
           const addData = await response.json();
           if (addData.message && addData.message.status) {
             setAddedItems(prev => new Set([...prev, product.item_code]));
+            
+            // Dispatch cart update event
+            window.dispatchEvent(new Event('cartUpdated'));
           }
           if (fetchCartCount) {
             fetchCartCount();
@@ -71,7 +74,7 @@ const BestSeller = ({ addToCart, navigateTo, user, products = [], userDetails, f
   // Handle view details - fetch item details from API
   const handleViewDetails = async (product) => {
     const itemCode = product.item_code || product.id;
-    if (!user || !itemCode) {
+    if (!itemCode) {
       navigateTo('products', null, product.category);
       return;
     }
@@ -88,7 +91,7 @@ const BestSeller = ({ addToCart, navigateTo, user, products = [], userDetails, f
         body: JSON.stringify({
           page: 1,
           page_size: 20,
-          mobile_no: parseInt(user.phone),
+          mobile_no: user?.phone ? parseInt(user.phone) : 1234567890,
           item_code: itemCode
         })
       });
@@ -121,25 +124,40 @@ const BestSeller = ({ addToCart, navigateTo, user, products = [], userDetails, f
         body: formData
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        const formattedProducts = (data.message.data.data || []).map((item, index) => ({
-          id: item.item_code || index,
-          item_code: item.item_code,
-          name: item.item_name || 'Product Name',
-          price: parseFloat(item.price || item.actual_rate) || 0,
-          originalPrice: parseFloat(item.mrp) || parseFloat(item.price || item.actual_rate),
-          discount: parseFloat(item.discount) || 0,
-          image: item.custom_image_1 || item.item_image || 'https://via.placeholder.com/300x200',
-          category: item.item_group || 'General',
-          rating: 4.5,
-          reviews: Math.floor(Math.random() * 100) + 10,
-          mrp: item.mrp,
-          actual_rate: item.actual_rate
-        }));
-        setApiProducts(formattedProducts);
-      }
+        if (response.ok) {
+          const data = await response.json();
+          if (data.message && data.message.status && data.message.data && data.message.data.data) {
+            const formattedProducts = data.message.data.data.map((item, index) => ({
+              id: item.item_code || index,
+              item_code: item.item_code,
+              name: item.item_name || 'Product Name',
+              price: item.price || item.actual_rate || null,
+              originalPrice: item.mrp || item.price || item.actual_rate || null,
+              discount: item.discount || null,
+              image: item.custom_image_1 || item.image || 'https://via.placeholder.com/300x200',
+              category: item.item_group || 'General',
+              rating: 4.5,
+              reviews: Math.floor(Math.random() * 100) + 10,
+              mrp: item.mrp,
+              actual_rate: item.actual_rate
+            }));
+            setApiProducts(formattedProducts);
+          } else {
+            // If no data, show fallback products
+            setApiProducts([
+              { id: 1, name: '1.5 HP 100MM Borewell Submersible Pumps-1 PH (Oil Filled) KP4-0321S-CP A', price: 299, originalPrice: 399, discount: 25, image: 'https://storage.googleapis.com/shoption-cdn-bucket/uploads/2021/kbl/KP40321SCPA.jpg', category: 'Motor & Pump', rating: 4.5, reviews: 125, item_code: '12832' },
+              { id: 2, name: '4" S.S. BALL VALVE', price: 159, originalPrice: 199, discount: 20, image: 'https://storage.googleapis.com/shoption-cdn-bucket/uploads/2021/images/ciballvalve.jpg', category: 'Pipe Fittings & Solution', rating: 4.7, reviews: 89, item_code: '20068' },
+              { id: 3, name: 'THRESHER SPLIT FLY WHEEL - 31 inch 79 KG', price: 4599, originalPrice: 5599, discount: 18, image: 'https://storage.googleapis.com/shoption-cdn-bucket/uploads/2021/01/THRESHER-SPLIT-FLY-WHEEL.jpeg', category: 'Tractor Implements', rating: 4.8, reviews: 156, item_code: '11907' }
+            ]);
+          }
+        }
     } catch (error) {
+      // Fallback products on error
+      setApiProducts([
+        { id: 1, name: 'Best Seller Cable', price: 299, originalPrice: 399, discount: 25, image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop', category: 'Electronics', rating: 4.5, reviews: 125, item_code: 'BEST001' },
+        { id: 2, name: 'Top Switch', price: 159, originalPrice: 199, discount: 20, image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=200&fit=crop', category: 'Electronics', rating: 4.7, reviews: 89, item_code: 'BEST002' },
+        { id: 3, name: 'Popular Solar Panel', price: 4599, originalPrice: 5599, discount: 18, image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=300&h=200&fit=crop', category: 'Solar', rating: 4.8, reviews: 156, item_code: 'BEST003' }
+      ]);
     } finally {
       setLoading(false);
     }
@@ -159,12 +177,13 @@ const BestSeller = ({ addToCart, navigateTo, user, products = [], userDetails, f
       <div className="container">
         <div className="section-header-dt">
           <h2 className="section-title-dt">Best Sellers</h2>
+          
           <button className="view-all-link-dt" onClick={() => navigateTo('products', null, null, 'bestsellers')}>View All →</button>
         </div>
-        {user && loading ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>Loading best sellers...</div>
+        {loading ? (
+          <div className="loading-message">Loading best sellers...</div>
         ) : displayProducts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem' }}>No best sellers available</div>
+          <div className="empty-message">No best sellers available</div>
         ) : (
         <div className="products-scroll-dt">
           {displayProducts.map((product, index) => (
@@ -178,27 +197,39 @@ const BestSeller = ({ addToCart, navigateTo, user, products = [], userDetails, f
                 {user ? (
                   product.originalPrice && product.originalPrice > product.price && (
                     <div className="discount-badge-dt">
-                      -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                      -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
                     </div>
                   )
                 ) : (
                   product.originalPrice > product.price && (
                     <div className="discount-badge-dt">
-                      -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
+                      -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
                     </div>
                   )
                 )}
+                <div className="product-rating-dt">
+                  <span className="stars-dt">★</span>
+                  <span className="rating-text-dt">({product.reviews || 0})</span>
+                </div>
               </div>
               <div className="product-info-dt">
                 <h3 className="product-name-dt">{product.name || product.item_name || 'Product Name'}</h3>
-                <div className="product-rating-dt">
-                  <span className="stars-dt">{'★'.repeat(Math.floor(product.rating || 4))}</span>
-                  <span className="rating-text-dt">({product.reviews || 0})</span>
-                </div>
+                <p className="product-tagline-dt">Crafted for farmers, powered by innovation. Right at your fingertips.</p>
+                {product.discount > 0 && (
+                  <div className="discount-text-dt">
+                    You Save ₹{Math.round(product.originalPrice - product.price)} ({Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%)
+                  </div>
+                )}
                 <div className="product-price-dt">
-                  <span className="current-price-dt">₹{product.price}</span>
-                  {product.originalPrice > product.price && (
-                    <span className="original-price-dt">₹{product.originalPrice}</span>
+                  {product.price ? (
+                    <>
+                      <span className="current-price-dt">₹{product.price}</span>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <span className="original-price-dt">₹{product.originalPrice}</span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="login-price-dt">Price not available</span>
                   )}
                 </div>
                 <button className="btn-dt btn-primary-dt" onClick={() => user ? handleAddToCart(product) : navigateTo('auth')}>

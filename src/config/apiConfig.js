@@ -1,7 +1,8 @@
 export const API_CONFIG = {
-  Prabhat_URL: import.meta.env.VITE_Prabhat_Base || 'https://uaterp.gbru.in',
+  Prabhat_URL: import.meta.env.VITE_Prabhat_Base || (import.meta.env.DEV ? '' : `https://uaterp.gbru.in`),
   API_KEY: import.meta.env.VITE_ERPNEXT_API_KEY || 'SHOPTION_XYZ_9834SDJKS',
-  API_SECRET: import.meta.env.VITE_ERPNEXT_API_SECRET || 'SHOPTION_SECRET_99ASD9A8S9D'
+  API_SECRET: import.meta.env.VITE_ERPNEXT_API_SECRET || 'SHOPTION_SECRET_99ASD9A8S9D',
+  PAYMENT_URL: import.meta.env.VITE_PAYMENT_PRABHAT 
 };
 
 // Debug logging

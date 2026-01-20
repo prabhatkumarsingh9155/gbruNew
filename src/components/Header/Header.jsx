@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './Header.css';
 
 // Header component - Main navigation bar with logo and user actions
-const Header = ({ cartItemsCount, user, navigateTo }) => {
+const Header = ({ cartItemsCount, user, userDetails, navigateTo }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -34,7 +34,7 @@ const Header = ({ cartItemsCount, user, navigateTo }) => {
             {/* User Authentication Section */}
             {user ? (
               <div className="user-menu">
-                <span className="user-name">Hi, {user.name}</span>
+                <span className="user-name">Hi, {userDetails?.Customer_name || user.name}</span>
                 <button className="account-icon" onClick={() => navigateTo('account')}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                     <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

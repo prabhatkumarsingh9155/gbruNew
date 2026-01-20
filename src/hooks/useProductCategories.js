@@ -31,7 +31,7 @@ export const useProductCategories = (user) => {
         
         if (FILTER_CATEGORIES) {
           const allowedSubcategories = [
-            'Flat Submersible Cable', 'Aluminium Service Cable', 'Flexible Cables'
+           'Seed Drill', 'Flat Submersible Cable', 'Aluminium Service Cable', 
           ];
           
           apiCategories = data.message.data.data
@@ -74,9 +74,15 @@ export const useProductCategories = (user) => {
     if (user) {
       fetchCategoriesFromAPI();
     } else {
-      setCategories([]);
+      // Show dummy categories when no user is logged in
+      setCategories([
+        { id: 'electronics', name: 'Electronics', subcategory_name: 'Electronics', color: '#10b981', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=300&h=200&fit=crop' },
+        { id: 'solar', name: 'Solar', subcategory_name: 'Solar', color: '#f59e0b', image: 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=300&h=200&fit=crop' },
+        { id: 'tools', name: 'Tools', subcategory_name: 'Tools', color: '#3b82f6', image: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=300&h=200&fit=crop' },
+        { id: 'hardware', name: 'Hardware', subcategory_name: 'Hardware', color: '#ef4444', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=200&fit=crop' }
+      ]);
     }
-  }, [user]);
+  }, [user]); // Fetch categories for all users, not dependent on user login
 
   return {
     categories,

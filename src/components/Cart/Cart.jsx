@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { API_CONFIG } from '../../config/apiConfig';
+import SimilarCartProducts from '../SimilarCartProducts/SimilarCartProducts';
 import './Cart.css';
 
 const Cart = ({ cart, updateQuantity, removeItem, total, navigateTo, user, userDetails, fetchCartCount }) => {
@@ -57,6 +58,14 @@ const Cart = ({ cart, updateQuantity, removeItem, total, navigateTo, user, userD
       return;
     }
     
+    // Find the item to get its price before removing
+    const itemToDelete = cartItems.find(item => item.item_code === itemCode);
+    const itemTotalPrice = itemToDelete ? itemToDelete.price * itemToDelete.quantity : 0;
+    
+    // Optimistically update UI
+    setCartItems(prev => prev.filter(item => item.item_code !== itemCode));
+    setApiTotal(prev => prev - itemTotalPrice);
+    
     try {
       const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.cart.cart.delete_cart_item`, {
         method: 'DELETE',
@@ -72,16 +81,16 @@ const Cart = ({ cart, updateQuantity, removeItem, total, navigateTo, user, userD
       const data = await response.json();
       if (response.ok && data.message && data.message.status) {
         console.log('✅ Item deleted successfully');
-        // Refresh cart items and count
-        fetchCartItems();
         if (fetchCartCount) {
           fetchCartCount();
         }
       } else {
         console.error('❌ Failed to delete item');
+        fetchCartItems();
       }
     } catch (error) {
       console.error('❌ Error deleting item:', error);
+      fetchCartItems();
     }
   };
   const handleUpdateQuantity = async (itemCode, newQuantity) => {
@@ -332,7 +341,7 @@ const Cart = ({ cart, updateQuantity, removeItem, total, navigateTo, user, userD
               <span>Total:</span>
               <span>₹{displayTotal.toFixed(2)}</span>
             </div>
-            <button className="btn btn-primary btn-lg" onClick={handleCheckout}>
+            <button className="checkout-btn" onClick={handleCheckout}>
               Proceed to Checkout
             </button>
           </div>
@@ -344,10 +353,21 @@ const Cart = ({ cart, updateQuantity, removeItem, total, navigateTo, user, userD
         <div className="mobile-total">
           <span>Total: ₹{displayTotal.toFixed(2)}</span>
         </div>
-        <button className="btn btn-primary mobile-checkout-btn" onClick={handleCheckout}>
+        <button className="checkout-btn mobile-checkout-btn" onClick={handleCheckout}>
           Proceed to Checkout
         </button>
       </div>
+      
+      <SimilarCartProducts 
+        cartItems={displayCart}
+        user={user}
+        userDetails={userDetails}
+        navigateTo={navigateTo}
+        fetchCartCount={fetchCartCount}
+        onCartUpdate={fetchCartItems}
+        setCartItems={setCartItems}
+        setApiTotal={setApiTotal}
+      />
     </div>
   );
 };

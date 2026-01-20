@@ -10,7 +10,7 @@ export const useProductsCatalog = (user) => {
     { image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&h=500&fit=crop" }
   ]);
 
-  const fetchProductsByCategory = async (categoryName, userPhone) => {
+  const fetchProductsByCategory = async (categoryName, userPhone = '1234567890') => {
     try {
       const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.erp_api.item_api.get_items`, {
         method: 'POST',
@@ -22,30 +22,36 @@ export const useProductsCatalog = (user) => {
         body: JSON.stringify({
           page: 1,
           page_size: 20,
-          mobile_no: userPhone,
+          mobile_no: parseInt(userPhone),
           brand: 'Gbru',
           subcategory: categoryName
         })
       });
       const data = await response.json();
+      console.log('fetchProductsByCategory API response:', data);
       if (data && data.message && data.message.data && data.message.data.data) {
         const categoryProducts = data.message.data.data.map((item, index) => ({
-          id: item.name || index,
+          id: item.item_code || index,
+          item_code: item.item_code,
           name: item.item_name || item.name,
-          price: item.standard_rate || item.price || 0,
-          originalPrice: item.mrp_rate || item.original_price,
-          image: item.image || 'https://via.placeholder.com/300x300',
+          price: parseFloat(item.price || item.standard_rate) || 299,
+          originalPrice: parseFloat(item.mrp_rate || item.original_price) || 399,
+          discount: parseFloat(item.discount) || 25,
+          image: item.custom_image_1 || item.image || 'https://via.placeholder.com/300x300',
           category: categoryName,
           rating: 4.5,
           reviews: 100,
           featured: false,
           bestSeller: false
         }));
+        console.log('Setting category products:', categoryProducts);
         setProducts(categoryProducts);
       } else {
+        console.log('No API data, using sample products');
         setProducts(sampleProducts);
       }
     } catch (error) {
+      console.error('Error fetching category products:', error);
       setProducts(sampleProducts);
     }
   };

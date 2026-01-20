@@ -5,6 +5,28 @@ export const useShoppingCart = (userDetails) => {
   const [cart, setCart] = useState([]);
   const [cartCount, setCartCount] = useState(0);
 
+  const fetchCart = async () => {
+    if (!userDetails?.token) return;
+    
+    try {
+      const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.cart.cart.get_cart`, {
+        method: 'GET',
+        headers: {
+          'Authorization': userDetails.token,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      if (response.ok && data.message && data.message.status) {
+        setCart(data.message.data.items || []);
+        setCartCount(data.message.data.items?.length || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching cart:', error);
+    }
+  };
+
   const fetchCartCount = async () => {
     if (!userDetails?.token) return;
     
@@ -39,8 +61,10 @@ export const useShoppingCart = (userDetails) => {
 
   useEffect(() => {
     if (userDetails?.token) {
+      fetchCart();
       fetchCartCount();
       const interval = setInterval(() => {
+        fetchCart();
         fetchCartCount();
       }, 30000);
       return () => clearInterval(interval);
@@ -49,6 +73,7 @@ export const useShoppingCart = (userDetails) => {
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
+    window.dispatchEvent(new Event('cartUpdated'));
   }, [cart]);
 
   const addToCart = (product, quantity = 1) => {
@@ -62,6 +87,7 @@ export const useShoppingCart = (userDetails) => {
     } else {
       setCart([...cart, { ...product, quantity }]);
     }
+    setCartCount(prev => prev + quantity);
   };
 
   const updateCartQuantity = (id, quantity) => {
@@ -96,6 +122,7 @@ export const useShoppingCart = (userDetails) => {
   return {
     cart,
     cartCount,
+    fetchCart,
     fetchCartCount,
     addToCart,
     updateCartQuantity,

@@ -21,7 +21,7 @@ const ViewDetails = ({ navigateTo, userDetails, orderId }) => {
       console.log('🔍 Fetching order details for:', orderId);
       console.log('🔑 Using token:', userDetails.token);
       
-      const response = await fetch('${API_CONFIG.Prabhat_URL}/api/method/shoption_api.cart.cart.get_order_details', {
+      const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.cart.cart.get_order_details`, {
         method: 'POST',
         headers: {
           'Authorization': userDetails.token,

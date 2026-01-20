@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { API_CONFIG } from '../../config/apiConfig';
+import CouponSuccessPopup from '../CouponSuccessPopup/CouponSuccessPopup';
+import { CiLocationOn } from 'react-icons/ci';
+import { FaClipboardList } from 'react-icons/fa';
+import { RiCoupon2Fill } from 'react-icons/ri';
+import { MdOutlinePayment } from 'react-icons/md';
+import { IoMdPersonAdd } from "react-icons/io";
+
 import './Checkout.css';
 
 // Checkout component - Handles order checkout with address management and order summary
@@ -8,9 +15,9 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
   const displayCart = checkoutData?.items || cart;
   const displayTotal = checkoutData?.grand_total || (checkoutData?.items ? checkoutData.items.reduce((sum, item) => sum + item.amount, 0) : total());
   
-  console.log('🔍 Checkout Data:', checkoutData);
-  console.log('🛍️ Display Cart:', displayCart);
-  console.log('💰 Display Total:', displayTotal);
+  // console.log('🔍 Checkout Data:', checkoutData);
+  // console.log('🛍️ Display Cart:', displayCart);
+  // console.log('💰 Display Total:', displayTotal);
   const minimumOrderValue = 1000;
   const isOrderBelowMinimum = displayTotal < minimumOrderValue;
 
@@ -25,6 +32,74 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
   const [districts, setDistricts] = useState([]);
   const [tahsils, setTahsils] = useState([]);
   const [marketplaces, setMarketplaces] = useState([]);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [showCouponInput, setShowCouponInput] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showRemovePopup, setShowRemovePopup] = useState(false);
+
+  // Handle coupon code application
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim() || !user || !userDetails?.token) return;
+    
+    setApplyingCoupon(true);
+    try {
+      const cartResponse = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.cart.cart.get_cart`, {
+        method: 'GET',
+        headers: {
+          'Authorization': userDetails.token,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      const cartData = await cartResponse.json();
+      if (!cartResponse.ok || !cartData.message?.status) {
+        throw new Error('Failed to get cart items');
+      }
+      
+      const proceedItems = cartData.message.data.items.map(item => ({
+        "item": item.item,
+        "quantity": item.quantity.toString()
+      }));
+      
+      const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.cart.cart.proceed`, {
+        method: 'POST',
+        headers: {
+          'Authorization': userDetails.token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          "items": proceedItems,
+          "delivery_date": "null",
+          "warehouse": "",
+          "transporter": "",
+          "coupon_code": couponCode
+        })
+      });
+      
+      const data = await response.json();
+      if (response.ok && data.message?.status) {
+        setAppliedCoupon(data.message.data);
+        setShowSuccessPopup(true);
+      } else {
+        alert(data.message?.message || 'Invalid coupon code');
+      }
+    } catch (error) {
+      console.error('Error applying coupon:', error);
+      alert('Failed to apply coupon');
+    } finally {
+      setApplyingCoupon(false);
+    }
+  };
+
+  // Handle coupon removal
+  const handleRemoveCoupon = () => {
+    setCouponCode('');
+    setAppliedCoupon(null);
+    setShowCouponInput(false);
+    setShowRemovePopup(true);
+  };
 
   // API configuration
   const API_KEY = API_CONFIG.API_KEY;
@@ -524,30 +599,42 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
   };
 
   return (
-    <div className="checkout-page">
-      <div className="container">
+    <div className="checkout-page-ctp">
+      {showSuccessPopup && (
+        <CouponSuccessPopup 
+          onClose={() => setShowSuccessPopup(false)} 
+          discount={appliedCoupon?.discount_amount}
+        />
+      )}
+      {showRemovePopup && (
+        <CouponSuccessPopup 
+          onClose={() => setShowRemovePopup(false)} 
+          isRemoved={true}
+        />
+      )}
+      <div className="container-ctp">
         <h1>Checkout</h1>
         
-        <div className="checkout-flow">
+        <div className="checkout-flow-ctp">
           {/* 1. Address Section */}
-          <div className="checkout-section">
-            <div className="section-header">
-              <h3>📍 Shipping Address</h3>
+          <div className="checkout-section-ctp">
+            <div className="section-header-ctp">
+              <h3><CiLocationOn /> Shipping Address</h3>
               {user && userDetails?.token && (
-                <button type="button" className="add-address-link" onClick={() => navigateTo('addNewAddress')}>
-                  + Add New Address
+                <button type="button" className="add-address-link-ctp" onClick={() => navigateTo('addNewAddress')}>
+                <IoMdPersonAdd /> New Address
                 </button>
               )}
             </div>
             
             {/* Display Primary Address */}
             {user && userDetails?.token && shippingAddresses.length > 0 && (
-              <div className="api-address-display">
+              <div className="api-address-display-ctp">
                 {(() => {
                   const primaryAddress = shippingAddresses.find(addr => addr.is_primary === 1);
                   return primaryAddress ? (
-                    <div className="address-card selected">
-                      <div className="address-info">
+                    <div className="address-card-ctp selected">
+                      <div className="address-info-ctp">
                         <p>{primaryAddress.customer_name || primaryAddress.address_title} - {primaryAddress.phone}</p>
                         <p>{primaryAddress.state_name || primaryAddress.state}, {primaryAddress.district_name || primaryAddress.district}, {primaryAddress.tahsil_name || primaryAddress.tahsil}</p>
                         <p>{primaryAddress.marketplace_name || primaryAddress.marketplace} - {primaryAddress.pincode}</p>
@@ -563,20 +650,20 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
             
             {/* Address Form */}
             {user && userDetails?.token && showAddressForm && (
-              <div className="address-form">
+              <div className="address-form-ctp">
                 <h4>Add New Address</h4>
-                <div className="form-row">
+                <div className="form-row-ctp">
                   <input type="text" name="address_title" placeholder="Address Title" value={formData.address_title} onChange={handleInputChange} required />
                   <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} required />
                 </div>
-                <div className="form-group">
+                <div className="form-group-ctp">
                   <input type="email" name="email_id" placeholder="Email" value={formData.email_id} onChange={handleInputChange} required />
                 </div>
-                <div className="form-row">
+                <div className="form-row-ctp">
                   <input type="text" name="address_line1" placeholder="Address Line 1" value={formData.address_line1} onChange={handleInputChange} required />
                   <input type="text" name="address_line2" placeholder="Address Line 2" value={formData.address_line2} onChange={handleInputChange} />
                 </div>
-                <div className="form-row">
+                <div className="form-row-ctp">
                   <select name="country" value={formData.country} onChange={(e) => { const country = e.target.value; setFormData(prev => ({ ...prev, country, state: '', district: '', tahsil: '', marketplace: '' })); if (country) fetchStates(country); }} required>
                     <option value="">Select Country</option>
                     {countries.map((country) => (<option key={country.id} value={country.name}>{country.name}</option>))}
@@ -586,7 +673,7 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
                     {states.map((state) => (<option key={state.id} value={state.id}>{state.name}</option>))}
                   </select>
                 </div>
-                <div className="form-row">
+                <div className="form-row-ctp">
                   <select name="district" value={formData.district} onChange={(e) => { const district = e.target.value; setFormData(prev => ({ ...prev, district, tahsil: '', marketplace: '' })); if (district) fetchTahsils(district); }} required disabled={!formData.state}>
                     <option value="">Select District</option>
                     {districts.map((district) => (<option key={district.id} value={district.id}>{district.name}</option>))}
@@ -596,75 +683,135 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
                     {tahsils.map((tahsil) => (<option key={tahsil.id} value={tahsil.id}>{tahsil.name}</option>))}
                   </select>
                 </div>
-                <div className="form-row">
+                <div className="form-row-ctp">
                   <select name="marketplace" value={formData.marketplace} onChange={handleInputChange} required disabled={!formData.tahsil}>
                     <option value="">Select Marketplace</option>
                     {marketplaces.map((marketplace) => (<option key={marketplace.id} value={marketplace.id}>{marketplace.name}</option>))}
                   </select>
                   <input type="text" name="pincode" placeholder="PIN Code" value={formData.pincode} onChange={handleInputChange} required />
                 </div>
-                <div className="form-actions">
-                  <button type="button" className="btn btn-primary" onClick={handleAddNewAddress}>Save Address</button>
-                  <button type="button" className="btn btn-outline" onClick={() => setShowAddressForm(false)}>Cancel</button>
+                <div className="form-actions-ctp">
+                  <button type="button" className="btn-ctp btn-primary-ctp" onClick={handleAddNewAddress}>Save Address</button>
+                  <button type="button" className="btn-ctp btn-outline-ctp" onClick={() => setShowAddressForm(false)}>Cancel</button>
                 </div>
               </div>
             )}
           </div>
           
           {/* 2. Products Section */}
-          <div className="checkout-section">
+          <div className="checkout-section-ctp">
             <h3>🛍️ Order Items</h3>
-            <div className="order-items">
+            <div className="order-items-ctp">
               {displayCart.map((item, index) => (
-                <div key={item.id || item.item || index} className="order-item">
+                <div key={item.id || item.item || index} className="order-item-ctp">
                   <img src={item.image || 'https://via.placeholder.com/60x60?text=No+Image'} alt={item.name || item.item_name} />
-                  <div className="item-details">
+                  <div className="item-details-ctp">
                     <h4>{item.name || item.item_name}</h4>
                     <p>Quantity: {item.quantity}</p>
                     {checkoutData ? (
                       <>
                         <p>Rate: ₹{item.rate}</p>
-                        <p>Brand: {item.brand}</p>
-                        <p>UOM: {item.uom}</p>
-                        {item.discount > 0 && <p>Discount: ₹{item.discount}</p>}
+                         {/* <p>Brand: {item.brand}</p> */}
+                        {/* <p>UOM: {item.uom}</p> */}
+                        {/* {item.discount > 0 && <p>Discount: ₹{item.discount}</p>} */}
                       </>
                     ) : (
                       <p className="item-price">₹{((item.price || item.rate) * (item.quantity || 1)).toFixed(2)}</p>
                     )}
                   </div>
-                  <div className="item-total">
+                  <div className="item-total-ctp">
                     ₹{(item.amount || ((item.price || item.rate) * (item.quantity || 1))).toFixed(2)}
                   </div>
+                  
                 </div>
               ))}
             </div>
           </div>
           
           {/* 3. Order Summary Section */}
-          <div className="checkout-section">
-            <h3>📋 Order Summary</h3>
-            <div className="order-total">
-              <div className="total-row">
+          <div className="checkout-section-ctp">
+            <h3><FaClipboardList /> Order Summary</h3>
+            
+            {/* Coupon Code Section */}
+            <div className="coupon-section-ctp">
+              {!showCouponInput && !appliedCoupon ? (
+                <div className="coupon-trigger-ctp" onClick={() => setShowCouponInput(true)}>
+                  <RiCoupon2Fill /> Apply Coupon Code
+                </div>
+              ) : (
+                <>
+                  <div className="coupon-input-group-ctp">
+                    <input 
+                      type="text" 
+                      placeholder="Enter coupon code" 
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value)}
+                      className="coupon-input-ctp"
+                      disabled={appliedCoupon}
+                    />
+                    {appliedCoupon ? (
+                      <button 
+                        className="btn-remove-coupon-ctp" 
+                        onClick={handleRemoveCoupon}
+                      >
+                        Remove
+                      </button>
+                    ) : (
+                      <button 
+                        className="btn-apply-coupon-ctp" 
+                        onClick={handleApplyCoupon}
+                        disabled={applyingCoupon || !couponCode.trim()}
+                      >
+                        {applyingCoupon ? 'Applying...' : 'Apply'}
+                      </button>
+                    )}
+                  </div>
+                  {appliedCoupon && (
+                    <div className="coupon-applied-ctp">
+                      ✓ Coupon applied successfully
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            
+            <div className="order-total-ctp">
+              <div className="total-row-ctp">
                 <span>Subtotal:</span>
-                <span>₹{displayTotal.toFixed(2)}</span>
+                <span>₹{(appliedCoupon?.sub_total || displayTotal).toFixed(2)}</span>
               </div>
-              <div className="total-row">
+              {(appliedCoupon?.discount_amount > 0 || (checkoutData?.items && checkoutData.items.some(item => item.discount > 0))) && (
+                <div className="total-row-ctp discount">
+                  <span>Discount:</span>
+                  <span>-₹{(
+                    (appliedCoupon?.discount_amount || 0) + 
+                    (checkoutData?.items?.reduce((sum, item) => sum + (item.discount || 0), 0) || 0)
+                  ).toFixed(2)}</span>
+                </div>
+              )}
+              {appliedCoupon?.total_taxes_and_charges > 0 && (
+                <div className="total-row-ctp">
+                  <span>Taxes:</span>
+                  <span>₹{appliedCoupon.total_taxes_and_charges.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="total-row-ctp">
                 <span>Shipping:</span>
                 <span>Free</span>
               </div>
-              <div className="total-row total-final">
+              <div className="total-row-ctp total-final-ctp">
                 <span>Total:</span>
-                <span>₹{(checkoutData?.grand_total || displayTotal).toFixed(2)}</span>
+                <span>₹{(appliedCoupon?.grand_total || checkoutData?.grand_total || displayTotal).toFixed(2)}</span>
               </div>
             </div>
           </div>
           
           {/* 4. Payment Options Section */}
-          <div className="checkout-section">
-            <h3>💳 Payment Options</h3>
+          <div className="checkout-section-ctp">
+            <h3><MdOutlinePayment /> Payment Options</h3>
             
             {isOrderBelowMinimum ? (
-              <div className="minimum-order-warning">
+              <div className="minimum-order-warning-ctp">
                 <p>⚠️ Minimum order value is ₹{minimumOrderValue}. Current total: ₹{displayTotal.toFixed(2)}</p>
                 <p>Please add items worth ₹{(minimumOrderValue - displayTotal).toFixed(2)} more to place order.</p>
               </div>
@@ -672,50 +819,62 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
               <>
                 {/* Full Payment Option */}
                 {checkoutData?.payment_summary?.full_payment ? (
-                  <div className={`payment-option highlighted ${selectedPayment === 'full' ? 'selected' : ''}`} onClick={() => setSelectedPayment('full')}>
-                    <div className="payment-header">
-                      <h5>💳 Full Payment</h5>
-                      <span className="payment-badge">Best Deal</span>
+                  <div className={`payment-option-ctp full-payment-card ${selectedPayment === 'full' ? 'selected' : ''}`} onClick={() => setSelectedPayment('full')}>
+                    <div className="payment-radio-ctp">
+                      <input type="radio" checked={selectedPayment === 'full'} readOnly />
                     </div>
-                    <div className="payment-details">
-                      <div className="payment-amount">₹{checkoutData.payment_summary.full_payment.payable_amount}</div>
-                      <div className="payment-savings">{checkoutData.payment_summary.full_payment.label}</div>
-                      <div className="payment-discount">Save ₹{checkoutData.payment_summary.full_payment.discount_amount}</div>
+                    <div className="payment-content-ctp">
+                      <h5 className="payment-title-ctp">Full Payment</h5>
+                      <div className="payment-subtitle-ctp">No Additional Charges</div>
+                    </div>
+                    <div className="payment-right-ctp">
+                      <div className="payment-price-ctp">₹{checkoutData.payment_summary.full_payment.payable_amount.toFixed(2)}</div>
+                      <span className="payment-save-badge-ctp">Save ₹{checkoutData.payment_summary.full_payment.discount_amount.toFixed(2)}</span>
                     </div>
                   </div>
                 ) : (
-                  <div className={`payment-option highlighted ${selectedPayment === 'full' ? 'selected' : ''}`} onClick={() => setSelectedPayment('full')}>
-                    <div className="payment-header">
-                      <h5>💳 Full Payment</h5>
-                      <span className="payment-badge">Best Deal</span>
+                  <div className={`payment-option-ctp full-payment-card ${selectedPayment === 'full' ? 'selected' : ''}`} onClick={() => setSelectedPayment('full')}>
+                    <div className="payment-radio-ctp">
+                      <input type="radio" checked={selectedPayment === 'full'} readOnly />
                     </div>
-                    <div className="payment-details">
-                      <div className="payment-amount">₹{displayTotal.toFixed(2)}</div>
-                      <div className="payment-savings">Pay full amount now</div>
+                    <div className="payment-content-ctp">
+                      <h5 className="payment-title-ctp">Full Payment</h5>
+                      <div className="payment-subtitle-ctp">No Additional Charges</div>
+                    </div>
+                    <div className="payment-right-ctp">
+                      <div className="payment-price-ctp">₹{displayTotal.toFixed(2)}</div>
                     </div>
                   </div>
                 )}
                 
                 {/* Cash on Delivery Option */}
                 {checkoutData?.payment_summary?.cash_on_delivery ? (
-                  <div className={`payment-option ${selectedPayment === 'cod' ? 'selected' : ''}`} onClick={() => setSelectedPayment('cod')}>
-                    <div className="payment-header">
-                      <h5>🚚 Cash on Delivery</h5>
+                  <div className={`payment-option-ctp cod-payment-card ${selectedPayment === 'cod' ? 'selected' : ''}`} onClick={() => setSelectedPayment('cod')}>
+                    <div className="payment-radio-ctp">
+                      <input type="radio" checked={selectedPayment === 'cod'} readOnly />
                     </div>
-                    <div className="payment-details">
-                      <div className="payment-amount">Pay Now: ₹{checkoutData.payment_summary.cash_on_delivery.pay_now}</div>
-                      <div className="payment-savings">{checkoutData.payment_summary.cash_on_delivery.label}</div>
-                      <div className="cod-balance">Pay ₹{checkoutData.payment_summary.cash_on_delivery.pay_on_delivery} on delivery</div>
+                    <div className="payment-content-ctp">
+                      <h5 className="payment-title-ctp">Booking Amount</h5>
+                      <div className="payment-subtitle-ctp">Pay Rest on Delivery: ₹{checkoutData.payment_summary.cash_on_delivery.pay_on_delivery.toFixed(2)}</div>
+                    </div>
+                    <div className="payment-right-ctp">
+                      <div className="payment-price-ctp">₹{checkoutData.payment_summary.cash_on_delivery.pay_now.toFixed(2)}</div>
+                      {checkoutData.payment_summary.cash_on_delivery.discount_amount > 0 && (
+                        <span className="payment-save-badge-ctp">Save ₹{checkoutData.payment_summary.cash_on_delivery.discount_amount.toFixed(2)}</span>
+                      )}
                     </div>
                   </div>
                 ) : (
-                  <div className={`payment-option ${selectedPayment === 'cod' ? 'selected' : ''}`} onClick={() => setSelectedPayment('cod')}>
-                    <div className="payment-header">
-                      <h5>🚚 Cash on Delivery</h5>
+                  <div className={`payment-option-ctp cod-payment-card ${selectedPayment === 'cod' ? 'selected' : ''}`} onClick={() => setSelectedPayment('cod')}>
+                    <div className="payment-radio-ctp">
+                      <input type="radio" checked={selectedPayment === 'cod'} readOnly />
                     </div>
-                    <div className="payment-details">
-                      <div className="payment-amount">₹0.00</div>
-                      <div className="payment-savings">Pay full amount on delivery</div>
+                    <div className="payment-content-ctp">
+                      <h5 className="payment-title-ctp">Booking Amount</h5>
+                      <div className="payment-subtitle-ctp">Pay Rest on Delivery: ₹{displayTotal.toFixed(2)}</div>
+                    </div>
+                    <div className="payment-right-ctp">
+                      <div className="payment-price-ctp">₹0.00</div>
                     </div>
                   </div>
                 )}
@@ -724,13 +883,13 @@ const Checkout = ({ cart, total, clearCart, navigateTo, user, checkoutData, user
           </div>
           
           {/* 5. Place Order Section */}
-          <div className="checkout-section">
+          <div className="checkout-section-ctp">
             <button 
-              className="btn btn-primary btn-lg place-order-btn" 
+              className="place-order-btn-ctp" 
               onClick={handlePlaceOrder}
               disabled={placingOrder || isOrderBelowMinimum}
             >
-              {placingOrder ? 'Placing Order...' : isOrderBelowMinimum ? `Minimum Order ₹${minimumOrderValue}` : '🛒 Place Order'}
+              {placingOrder ? 'Placing Order...' : isOrderBelowMinimum ? `Minimum Order ₹${minimumOrderValue}` : ' Place Order'}
             </button>
           </div>
         </div>

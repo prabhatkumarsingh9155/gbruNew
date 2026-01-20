@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { API_CONFIG } from '../../config/apiConfig';
+import { MdLocalShipping } from 'react-icons/md';
+import { FaBox, FaClipboardList, FaTrophy } from 'react-icons/fa';
+import SimilarProductDetails from '../SimilarProductDetails/SimilarProductDetails';
 import './ProductDetails.css';
 
 const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, previousPage, userDetails, fetchCartCount }) => {
@@ -27,6 +30,11 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
     unit: details.measurement_unit,
     minOrderQty: details.min_order_qty
   } : product;
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // Set initial quantity to minOrderQty if available
   useEffect(() => {
@@ -69,10 +77,18 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
   // Handle scroll for sticky bar
   useEffect(() => {
     const handleScroll = () => {
-      setShowStickyBar(window.scrollY > 400);
+      const isVisible = window.scrollY > 400;
+      setShowStickyBar(isVisible);
+      window.dispatchEvent(new CustomEvent('stickyBarVisible', { detail: { visible: isVisible } }));
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      window.dispatchEvent(new CustomEvent('stickyBarVisible', { detail: { visible: false } }));
+    };
   }, []);
 
   const handleAddToCart = async () => {
@@ -112,6 +128,9 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
           // Mark item as added
           setIsAdded(true);
           
+          // Dispatch cart update event
+          window.dispatchEvent(new Event('cartUpdated'));
+          
           // Refresh cart count
           if (fetchCartCount) {
             fetchCartCount();
@@ -132,13 +151,18 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
   return (
     <div className="product-details">
       <div className="container">
-        <button className="back-btn" onClick={() => navigateTo(previousPage || 'home')}>
+        <button className="back-btnn" onClick={() => navigateTo(previousPage || 'home')}>
           ← Back
         </button>
         
         <div className="product-content">
-          <div className="product-images">
-            <div className="main-image">
+          <div className="product-images-pd">
+            <div className="main-image-pd">
+              {displayProduct.originalPrice > displayProduct.price && (
+                <div className="discount-badge-pd">
+                  {Math.round(((displayProduct.originalPrice - displayProduct.price) / displayProduct.originalPrice) * 100)}% OFF
+                </div>
+              )}
               <img src={displayProduct.images?.[selectedImage] || displayProduct.image} alt={displayProduct.name} />
             </div>
             {displayProduct.images && displayProduct.images.length > 1 && (
@@ -161,41 +185,36 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
             
             <div className="price-section">
               <div className="price-row">
-                <span className="current-price">₹{displayProduct.price.toLocaleString()}/-</span>
-                {displayProduct.originalPrice > displayProduct.price && (
+                <span className="current-price">₹{displayProduct.price?.toLocaleString() || '0'}/-</span>
+                {displayProduct.originalPrice && displayProduct.originalPrice > displayProduct.price && (
                   <>
                     <span className="original-price">MRP: ₹{displayProduct.originalPrice.toLocaleString()}</span>
-                    <span className="discount-badge">{Math.round(((displayProduct.originalPrice - displayProduct.price) / displayProduct.originalPrice) * 100)}% Off</span>
+                    {/* <span className="discount-badge">{Math.round(((displayProduct.originalPrice - displayProduct.price) / displayProduct.originalPrice) * 100)}% Off</span> */}
                   </>
                 )}
               </div>
-              <div className="per-unit-text">(₹{displayProduct.price.toLocaleString()} per {displayProduct.unit || 'unit'})</div>
+              {/* <div className="per-unit-text">(₹{displayProduct.price.toLocaleString()} per {displayProduct.unit || 'unit'})</div> */}
             </div>
             
-            <div className="product-rating">
-              <span className="stars">{'★'.repeat(Math.floor(displayProduct.rating || 4))}</span>
-              <span className="rating-text">({displayProduct.rating || 4.1} out of 5)</span>
-              <span className="reviews-text">({displayProduct.reviews || 6082} ratings)</span>
-            </div>
-            
-            <div className="tax-info">
-              <span>📋 Inclusive of all taxes</span>
-            </div>
+            {/* <div className="tax-info">
+              <span><FaClipboardList /> Inclusive of all taxes</span>
+            </div> */}
             
             <div className="quality-badge">
-              <span>🏆 Farmer Approved Quality</span>
+              <span><FaTrophy /> Farmer Approved Quality</span>
+              <span><FaClipboardList /> Inclusive of all taxes</span>
             </div>
             
             <div className="delivery-info">
               <div className="info-box">
-                <div className="info-icon">📦</div>
+                <div className="info-icon"><FaBox /></div>
                 <div className="info-content">
                   <div className="info-label">MINIMUM ORDER</div>
                   <div className="info-value">{displayProduct.minOrderQty || 1}.0 Units</div>
                 </div>
               </div>
               <div className="info-box">
-                <div className="info-icon">🚚</div>
+                <div className="info-icon"><MdLocalShipping /></div>
                 <div className="info-content">
                   <div className="info-label">FAST DELIVERY</div>
                   <div className="info-value">2-3 Days</div>
@@ -211,18 +230,15 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
                   <div className="payment-details">
                     <div className="payment-row">
                       <span>Pay Now:</span>
-                      <span className="price">₹{details.full_payment_amount.toFixed(2)}</span>
-                    </div>
-                    <div className="payment-row per-unit-row">
-                      <span>(₹{details.full_payment_amount.toFixed(2)} per {displayProduct.unit || 'unit'})</span>
+                      <span className="price">₹{(details.full_payment_amount * quantity).toFixed(2)}</span>
                     </div>
                     <div className="payment-row">
                       <span>Actual Price:</span>
-                      <span>₹{displayProduct.price.toFixed(2)}</span>
+                      <span>₹{(displayProduct.price * quantity).toFixed(2)}</span>
                     </div>
                     <div className="payment-row">
                       <span>You Save:</span>
-                      <span className="discount">₹{details.full_payment_discount.toFixed(2)}</span>
+                      <span className="discount">₹{(details.full_payment_discount * quantity).toFixed(2)}</span>
                     </div>
                   </div>
                   
@@ -231,16 +247,16 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
                   <h4>Booking Amount</h4>
                   <div className="payment-details">
                     <div className="payment-row">
-                      <span>Booking Amount:</span>
-                      <span className="price">₹{details.COD_Display.toFixed(2)}</span>
+                      <span>Pay Now:</span>
+                      <span className="price">₹{(details.COD_Display * quantity).toFixed(2)}</span>
                     </div>
                     <div className="payment-row">
                       <span>Actual Price:</span>
-                      <span>₹{displayProduct.price.toFixed(2)}</span>
+                      <span>₹{(displayProduct.price * quantity).toFixed(2)}</span>
                     </div>
                     <div className="payment-row">
-                      <span>Remaining Amount on Delivery:</span>
-                      <span>₹{(details.COD_value - details.COD_Display).toFixed(2)}</span>
+                      <span>Pay on Delivery:</span>
+                      <span>₹{((details.COD_value - details.COD_Display) * quantity).toFixed(2)}</span>
                     </div>
                   </div>
                   
@@ -248,26 +264,20 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
               </div>
             )}
             
-            {displayProduct.unit && (
-              <div className="product-unit">
-                <span>Unit: {displayProduct.unit}</span>
-              </div>
-            )}
-            
             <div className="quantity-selector">
-              <label>Quantity:</label>
+              <div className="quantity-header">
+                <span className="quantity-label">Quantity:</span>
+                <span className="quantity-total">₹{((displayProduct.price || 0) * quantity).toLocaleString()}</span>
+              </div>
               <div className="quantity-controls">
                 <button onClick={() => setQuantity(Math.max(displayProduct.minOrderQty || 1, quantity - 1))}>-</button>
                 <span>{quantity}</span>
                 <button onClick={() => setQuantity(quantity + 1)}>+</button>
               </div>
-              {displayProduct.minOrderQty && (
-                <small>Minimum order: {displayProduct.minOrderQty}</small>
-              )}
             </div>
             
             <div className="product-actions">
-              <button className="btn btn-primary btn-lg" onClick={handleAddToCart}>
+              <button className="btn btn-primary btn-lg " onClick={handleAddToCart}>
                 {isAdded ? 'Added' : 'Add to Cart'}
               </button>
             </div>
@@ -315,10 +325,10 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
       <div className={`sticky-bottom-bar ${showStickyBar ? 'visible' : ''}`}>
         <div className="sticky-content">
           <div className="sticky-price">
-            <div className="sticky-price-main">₹{details?.full_payment_amount ? details.full_payment_amount.toLocaleString() : displayProduct.price.toLocaleString()}</div>
+            <div className="sticky-price-main">₹{details?.full_payment_amount ? (details.full_payment_amount * quantity).toLocaleString() : ((displayProduct.price || 0) * quantity).toLocaleString()}</div>
             <div className="sticky-price-details">
-              <span className="sticky-mrp">MRP: ₹{displayProduct.originalPrice.toLocaleString()}</span>
-              <span className="sticky-save">Save ₹{details?.full_payment_discount ? details.full_payment_discount.toLocaleString() : (displayProduct.originalPrice - displayProduct.price).toLocaleString()}</span>
+              <span className="sticky-mrp">MRP: ₹{((displayProduct.originalPrice || 0) * quantity).toLocaleString()}</span>
+              <span className="sticky-save">Save ₹{details?.full_payment_discount ? (details.full_payment_discount * quantity).toLocaleString() : (((displayProduct.originalPrice || 0) - (displayProduct.price || 0)) * quantity).toLocaleString()}</span>
             </div>
           </div>
           <div className="sticky-actions">
@@ -328,6 +338,14 @@ const ProductDetails = ({ product, productDetails, addToCart, navigateTo, user, 
           </div>
         </div>
       </div>
+
+      <SimilarProductDetails 
+        currentProduct={displayProduct} 
+        user={user} 
+        userDetails={userDetails} 
+        navigateTo={navigateTo} 
+        fetchCartCount={fetchCartCount} 
+      />
     </div>
   );
 };

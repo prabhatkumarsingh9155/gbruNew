@@ -3,7 +3,6 @@ import { API_CONFIG } from '../../config/apiConfig';
 import './TrustGallery.css';
 
 const TrustGallery = ({ user }) => {
-  console.log('TrustGallery rendered with user:', user);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [trustImages, setTrustImages] = useState([
     {
@@ -30,7 +29,6 @@ const TrustGallery = ({ user }) => {
   // Fetch trust gallery images from API when user is logged in
   const fetchTrustImages = async () => {
     try {
-      console.log('Fetching trust images from API...');
       const response = await fetch(`${API_CONFIG.Prabhat_URL}/api/method/shoption_api.erp_api.banner.banner_home_bottom_api.get_home_banner_bottom`, {
         method: 'POST',
         headers: {
@@ -42,7 +40,6 @@ const TrustGallery = ({ user }) => {
       });
       
       const data = await response.json();
-      console.log('Trust gallery API response:', data);
       
       if (response.ok && data.message && data.message.status && data.message.data && data.message.data.data) {
         const apiImages = data.message.data.data.map((item, index) => ({
@@ -50,10 +47,7 @@ const TrustGallery = ({ user }) => {
           title: `Partner ${index + 1}`,
           description: "Trusted quality partner"
         }));
-        console.log('Setting trust images:', apiImages);
         setTrustImages(apiImages);
-      } else {
-        console.log('API response not valid, keeping hardcoded images');
       }
     } catch (error) {
       console.error('Error fetching trust images:', error);
@@ -62,14 +56,9 @@ const TrustGallery = ({ user }) => {
 
   // Fetch images when user login status changes
   useEffect(() => {
-    console.log('TrustGallery useEffect triggered, user:', user);
     if (user) {
-      // User is logged in - fetch images from API
-      console.log('User logged in, fetching API images');
       fetchTrustImages();
     } else {
-      // User is not logged in - use hardcoded images
-      console.log('User not logged in, using hardcoded images');
       setTrustImages([
         {
           image: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=300&h=200&fit=crop",
