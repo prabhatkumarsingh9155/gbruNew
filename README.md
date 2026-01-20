@@ -1,4 +1,4 @@
-# ShopEasy - Modern E-commerce Website
+# Gbru - Modern E-commerce Website
 
 A complete, modern e-commerce website built with React.js featuring all essential shopping functionalities.
 
